@@ -131,12 +131,22 @@ class ANDONMonitor:
             
         except Exception as e:
             self.log_message(f"ERROR: Connection failed - {str(e)}")
+            if self.serial_port:
+                try:
+                    self.serial_port.close()
+                except:
+                    pass
+                self.serial_port = None
             
     def disconnect(self):
         """Disconnect from Arduino"""
         self.is_running = False
+        time.sleep(0.2)  # Give read thread time to finish
         if self.serial_port:
-            self.serial_port.close()
+            try:
+                self.serial_port.close()
+            except:
+                pass
             self.serial_port = None
         self.connect_btn.config(text="Connect")
         self.update_status("DISCONNECTED", "gray")
@@ -150,9 +160,15 @@ class ANDONMonitor:
                     line = self.serial_port.readline().decode('utf-8').strip()
                     if line:
                         self.process_message(line)
+            except serial.SerialException:
+                # Connection lost
+                self.log_message("ERROR: Serial connection lost")
+                self.root.after(0, self.disconnect)
+                break
             except Exception as e:
                 self.log_message(f"ERROR: Read failed - {str(e)}")
-                self.is_running = False
+                self.root.after(0, self.disconnect)
+                break
             time.sleep(0.1)
             
     def process_message(self, message):

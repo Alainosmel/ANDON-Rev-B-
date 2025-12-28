@@ -26,6 +26,11 @@ bool lastButtonState2 = HIGH;
 bool lastButtonState3 = HIGH;
 bool lastButtonState4 = HIGH;
 
+bool buttonPressed1 = false;
+bool buttonPressed2 = false;
+bool buttonPressed3 = false;
+bool buttonPressed4 = false;
+
 unsigned long lastDebounceTime1 = 0;
 unsigned long lastDebounceTime2 = 0;
 unsigned long lastDebounceTime3 = 0;
@@ -69,10 +74,10 @@ void setup() {
 
 void loop() {
   // Read button states with debouncing
-  checkButton(BUTTON_PIN_1, &lastButtonState1, &lastDebounceTime1, 1);
-  checkButton(BUTTON_PIN_2, &lastButtonState2, &lastDebounceTime2, 2);
-  checkButton(BUTTON_PIN_3, &lastButtonState3, &lastDebounceTime3, 3);
-  checkButton(BUTTON_PIN_4, &lastButtonState4, &lastDebounceTime4, 4);
+  checkButton(BUTTON_PIN_1, &lastButtonState1, &lastDebounceTime1, &buttonPressed1, 1);
+  checkButton(BUTTON_PIN_2, &lastButtonState2, &lastDebounceTime2, &buttonPressed2, 2);
+  checkButton(BUTTON_PIN_3, &lastButtonState3, &lastDebounceTime3, &buttonPressed3, 3);
+  checkButton(BUTTON_PIN_4, &lastButtonState4, &lastDebounceTime4, &buttonPressed4, 4);
   
   // Check for serial commands from Python
   if (Serial.available() > 0) {
@@ -85,7 +90,7 @@ void loop() {
   updateStateIndicators();
 }
 
-void checkButton(int pin, bool* lastState, unsigned long* lastDebounce, int buttonNum) {
+void checkButton(int pin, bool* lastState, unsigned long* lastDebounce, bool* pressed, int buttonNum) {
   bool reading = digitalRead(pin);
   
   if (reading != *lastState) {
@@ -93,8 +98,14 @@ void checkButton(int pin, bool* lastState, unsigned long* lastDebounce, int butt
   }
   
   if ((millis() - *lastDebounce) > debounceDelay) {
-    if (reading == LOW) {  // Button pressed (active LOW with pullup)
+    // Button is stable
+    if (reading == LOW && !(*pressed)) {
+      // Button just pressed (transition to LOW and not already pressed)
+      *pressed = true;
       handleButtonPress(buttonNum);
+    } else if (reading == HIGH && *pressed) {
+      // Button released
+      *pressed = false;
     }
   }
   

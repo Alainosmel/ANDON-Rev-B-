@@ -40,6 +40,7 @@ def test_andon_system():
     
     # Connect
     print("\n[2/5] Connecting to Arduino...")
+    ser = None
     try:
         ser = serial.Serial(port, 9600, timeout=2)
         time.sleep(2)  # Wait for Arduino reset
@@ -48,68 +49,74 @@ def test_andon_system():
         print(f"❌ Connection failed: {e}")
         return False
     
-    # Check for ready message
-    print("\n[3/5] Waiting for ready message...")
-    time.sleep(1)
-    if ser.in_waiting:
-        msg = ser.readline().decode('utf-8').strip()
-        print(f"✅ Received: {msg}")
-    else:
-        print("⚠️  No initial message (this is okay)")
-    
-    # Test STATUS command
-    print("\n[4/5] Testing STATUS command...")
-    ser.write(b"STATUS\n")
-    time.sleep(1)
-    
-    if ser.in_waiting:
-        response = ser.readline().decode('utf-8').strip()
-        print(f"✅ Response: {response}")
-        if response.startswith("STATUS:"):
-            print("✅ STATUS command working correctly")
+    try:
+        # Check for ready message
+        print("\n[3/5] Waiting for ready message...")
+        time.sleep(1)
+        if ser.in_waiting:
+            msg = ser.readline().decode('utf-8').strip()
+            print(f"✅ Received: {msg}")
         else:
-            print("⚠️  Unexpected response format")
-    else:
-        print("❌ No response to STATUS command")
-    
-    # Test RESET command
-    print("\n[5/5] Testing RESET command...")
-    ser.write(b"RESET\n")
-    time.sleep(1)
-    
-    if ser.in_waiting:
-        response = ser.readline().decode('utf-8').strip()
-        print(f"✅ Response: {response}")
-        if "RESET" in response:
-            print("✅ RESET command working correctly")
-        else:
-            print("⚠️  Unexpected response format")
-    else:
-        print("❌ No response to RESET command")
-    
-    # Run system test
-    print("\n[BONUS] Running system test...")
-    ser.write(b"TEST\n")
-    print("Watch for LED sequence and buzzer sound...")
-    
-    for i in range(10):  # Read test responses
-        time.sleep(0.5)
+            print("⚠️  No initial message (this is okay)")
+        
+        # Test STATUS command
+        print("\n[4/5] Testing STATUS command...")
+        ser.write(b"STATUS\n")
+        time.sleep(1)
+        
         if ser.in_waiting:
             response = ser.readline().decode('utf-8').strip()
-            print(f"  {response}")
-    
-    # Cleanup
-    ser.close()
-    
-    print("\n" + "=" * 60)
-    print("✅ Test Complete!")
-    print("=" * 60)
-    print("\nNext steps:")
-    print("  1. Try pressing buttons on Arduino")
-    print("  2. Run Python monitor: python andon_monitor.py")
-    print("  3. Run Python CLI: python andon_cli.py")
-    
-    return True
+            print(f"✅ Response: {response}")
+            if response.startswith("STATUS:"):
+                print("✅ STATUS command working correctly")
+            else:
+                print("⚠️  Unexpected response format")
+        else:
+            print("❌ No response to STATUS command")
+        
+        # Test RESET command
+        print("\n[5/5] Testing RESET command...")
+        ser.write(b"RESET\n")
+        time.sleep(1)
+        
+        if ser.in_waiting:
+            response = ser.readline().decode('utf-8').strip()
+            print(f"✅ Response: {response}")
+            if "RESET" in response:
+                print("✅ RESET command working correctly")
+            else:
+                print("⚠️  Unexpected response format")
+        else:
+            print("❌ No response to RESET command")
+        
+        # Run system test
+        print("\n[BONUS] Running system test...")
+        ser.write(b"TEST\n")
+        print("Watch for LED sequence and buzzer sound...")
+        
+        for i in range(10):  # Read test responses
+            time.sleep(0.5)
+            if ser.in_waiting:
+                response = ser.readline().decode('utf-8').strip()
+                print(f"  {response}")
+        
+        print("\n" + "=" * 60)
+        print("✅ Test Complete!")
+        print("=" * 60)
+        print("\nNext steps:")
+        print("  1. Try pressing buttons on Arduino")
+        print("  2. Run Python monitor: python andon_monitor.py")
+        print("  3. Run Python CLI: python andon_cli.py")
+        
+        return True
+        
+    finally:
+        # Cleanup - always close serial port
+        if ser:
+            try:
+                ser.close()
+            except:
+                pass
 
 
 if __name__ == "__main__":

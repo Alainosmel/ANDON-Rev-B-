@@ -52,12 +52,21 @@ class ANDONCLIMonitor:
             return True
         except Exception as e:
             print(f"ERROR: Connection failed - {e}")
+            if self.serial_port:
+                try:
+                    self.serial_port.close()
+                except:
+                    pass
+                self.serial_port = None
             return False
             
     def disconnect(self):
         """Disconnect from Arduino"""
         if self.serial_port:
-            self.serial_port.close()
+            try:
+                self.serial_port.close()
+            except:
+                pass
             self.serial_port = None
             print("Disconnected")
             
