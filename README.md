@@ -54,12 +54,18 @@ The ANDON system is a visual and audible alert system used in manufacturing envi
 
 ## Quick Start
 
-### Hardware Setup
+### 🚀 New to this system? Start here!
+
+**[📖 Complete Getting Started Guide](GETTING_STARTED.md)** - Step-by-step instructions for new users
+
+### Quick Setup (for experienced users)
+
+#### Hardware Setup
 1. Wire your Arduino according to the [wiring diagram](docs/WIRING.md)
 2. Upload the Arduino sketch from `arduino/ANDON_System.ino`
 3. Connect Arduino to your computer via USB
 
-### Software Setup
+#### Software Setup
 ```bash
 # Install Python dependencies
 cd python
@@ -74,8 +80,10 @@ python andon_cli.py
 
 ## Documentation
 
+- 🚀 **[Getting Started Guide](GETTING_STARTED.md)** - Step-by-step for beginners (NEW!)
 - 📘 [Setup Guide](docs/SETUP.md) - Complete installation and setup instructions
 - 🔌 [Wiring Diagram](docs/WIRING.md) - Hardware connection details
+- 🏗️ [Architecture](docs/ARCHITECTURE.md) - System design and technical details
 
 ## System Architecture
 
